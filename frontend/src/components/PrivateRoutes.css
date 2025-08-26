@@ -1,0 +1,14 @@
+/* src/styles/PrivateRoute.css */
+
+.protected-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.protected-wrapper h1 {
+  font-size: 2rem;
+  color: #444;
+}

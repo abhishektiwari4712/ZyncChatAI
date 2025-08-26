@@ -1,0 +1,13 @@
+.friend-request-btn {
+  background-color: #28a745;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  margin-top: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.friend-request-btn:hover {
+  background-color: #218838;
+}

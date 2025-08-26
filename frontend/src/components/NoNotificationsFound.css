@@ -1,0 +1,40 @@
+.no-notification-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px;
+  text-align: center;
+  color: #f5f5f5;
+}
+
+.no-notification-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #2a2735; /* same as bg-base-300 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.bell-icon {
+  width: 32px;
+  height: 32px;
+  color: #aaa; /* text-base-content opacity-40 */
+  opacity: 0.4;
+}
+
+.no-notification-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.no-notification-text {
+  font-size: 14px;
+  color: #aaa; /* text-base-content opacity-70 */
+  opacity: 0.7;
+  max-width: 400px;
+}

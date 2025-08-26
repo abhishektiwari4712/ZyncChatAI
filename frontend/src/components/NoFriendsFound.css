@@ -1,0 +1,21 @@
+.no-friends-card {
+  background-color: #f3f4f6; /* Tailwind's base-200 */
+  padding: 24px;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 0 0 transparent;
+  transition: box-shadow 0.3s ease;
+}
+
+.no-friends-title {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #111827; /* base-content */
+}
+
+.no-friends-text {
+  font-size: 14px;
+  color: #6b7280; /* base-content with opacity ~70% */
+  opacity: 0.7;
+}
