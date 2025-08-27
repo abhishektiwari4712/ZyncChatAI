@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import useAuthUser from "./hooks/useAuthUser";
 import Layout from "./components/Layout";
 import useThemeStore from "./store/useThemeStore";
+import PhoneAuthModal from "./components/PhoneAuthModal";
 
 import Home from "./Pages/Home/Home.jsx";
 import Login from "./Pages/Login/Login.jsx";
@@ -125,6 +126,7 @@ export default function App() {
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <PhoneAuthModal />
       <ToastContainer position="top-right" autoClose={3000} />
     </>
   );

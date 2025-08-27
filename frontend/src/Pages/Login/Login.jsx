@@ -3,12 +3,15 @@
 // src/Login/Login.jsx
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import axios from "../../lib/axios.js";
 import useAuthUser from "../../hooks/useAuthUser.js";
 import "./Login.css";
 
 const Login = () => {
   const { login, isLoggingIn } = useAuthUser();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +19,38 @@ const Login = () => {
       await login(form);
     } catch (e) {
       toast.error(e?.response?.data?.message || "Login failed");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    try {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      // Send Firebase ID token to backend (expected key: firebaseToken)
+      const res = await axios.post("/api/auth/google", { firebaseToken: idToken });
+
+      // Persist JWT for subsequent API calls
+      if (res?.data?.token) {
+        try {
+          localStorage.setItem("token", res.data.token);
+        } catch (_) {}
+      }
+
+      // Redirect based on onboarding status (same logic as email/password login)
+      const isOnboarded = res?.data?.user?.isOnboarded;
+      toast.success("Logged in successfully!");
+      window.location.href = isOnboarded ? "/" : "/onboarding";
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      toast.error(error?.response?.data?.message || error.message || "Google Sign-In failed");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -51,6 +86,25 @@ const Login = () => {
             {isLoggingIn ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <div className="divider">
+          <span>or</span>
+        </div>
+
+        <button
+          onClick={handleGoogleSignIn}
+          className="google-btn"
+          disabled={isGoogleLoading}
+        >
+          {isGoogleLoading ? (
+            "Signing in..."
+          ) : (
+            <>
+              <img src="/google-icon.svg" alt="Google" className="icon" />
+              Continue with Google
+            </>
+          )}
+        </button>
 
         <div className="login-footer">
           <p>

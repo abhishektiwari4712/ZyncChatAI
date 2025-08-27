@@ -15,16 +15,63 @@ const PhoneAuthModal = () => {
   
   const { login } = useAuthUser();
 
+  // Format phone number to E.164 format
+  const formatPhoneNumber = (number) => {
+    // Remove all non-digit characters
+    const cleaned = number.replace(/\D/g, '');
+    
+    // Check if it's a 10-digit Indian number
+    if (cleaned.length === 10) {
+      return '+91' + cleaned;
+    }
+    
+    // If it already has country code
+    if (cleaned.length > 10 && cleaned.startsWith('91')) {
+      return '+' + cleaned;
+    }
+    
+    // If it starts with +91 and has 12 digits
+    if (cleaned.startsWith('91') && cleaned.length === 12) {
+      return '+' + cleaned;
+    }
+    
+    // If it already starts with +
+    if (number.startsWith('+')) {
+      return number;
+    }
+    
+    // Default case - assume it's an Indian number
+    return '+91' + cleaned;
+  };
+
+  // Validate phone number
+  const isValidPhoneNumber = (number) => {
+    const formatted = formatPhoneNumber(number);
+    // Check if it's a valid E.164 format with +91 country code and 10 digits
+    return /^\+91\d{10}$/.test(formatted);
+  };
+
   // Initialize reCAPTCHA
   const setUpRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: (response) => {
-          // reCAPTCHA solved
-        },
-      });
+    // Clear any existing verifier
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
     }
+    
+    // Create new verifier with proper error handling
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+      callback: (response) => {
+        // reCAPTCHA solved
+      },
+      "expired-callback": () => {
+        // Response expired, reset reCAPTCHA
+        if (window.recaptchaVerifier) {
+          window.recaptchaVerifier.clear();
+          window.recaptchaVerifier = null;
+        }
+      }
+    });
   };
 
   // Expose the modal open function to window
@@ -40,6 +87,12 @@ const PhoneAuthModal = () => {
     // Cleanup function
     return () => {
       window.openPhoneAuthModal = null;
+      
+      // Clean up reCAPTCHA verifier
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
     };
   }, []);
 
@@ -47,10 +100,17 @@ const PhoneAuthModal = () => {
     e.preventDefault();
     setLoading(true);
     
+    // Validate phone number before sending OTP
+    if (!isValidPhoneNumber(phoneNumber)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number");
+      setLoading(false);
+      return;
+    }
+    
     try {
       setUpRecaptcha();
       const appVerifier = window.recaptchaVerifier;
-      const formattedPhoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+      const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
       
       const result = await signInWithPhoneNumber(auth, formattedPhoneNumber, appVerifier);
       setConfirmationResult(result);
@@ -58,7 +118,16 @@ const PhoneAuthModal = () => {
       toast.success("OTP sent successfully!");
     } catch (error) {
       console.error("Error sending OTP:", error);
-      toast.error("Failed to send OTP. Please try again.");
+      // Handle specific Firebase errors
+      if (error.code === 'auth/invalid-phone-number') {
+        toast.error("Invalid phone number. Please check the number and try again.");
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error("Too many requests. Please try again later.");
+      } else if (error.code === 'auth/billing-not-enabled') {
+        toast.error("Phone authentication is not available at the moment. Please contact support.");
+      } else {
+        toast.error("Failed to send OTP. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -103,6 +172,12 @@ const PhoneAuthModal = () => {
     setConfirmationResult(null);
     setStep(1);
     setIsOpen(false);
+    
+    // Clean up reCAPTCHA verifier
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+    }
   };
 
   if (!isOpen) return null;
@@ -123,9 +198,9 @@ const PhoneAuthModal = () => {
                 <input
                   type="tel"
                   id="phone"
-                  placeholder="Enter your phone number with country code (e.g., +1234567890)"
+                  placeholder="Enter your 10-digit mobile number"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   required
                 />
               </div>
