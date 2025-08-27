@@ -3,7 +3,9 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-  getMe
+  getMe,
+  phoneLogin,
+  firebaseLogin
 } from "../controllers/auth.Controller.js";
 import { completeOnboarding } from "../controllers/onboarding.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
@@ -44,5 +46,19 @@ router.get("/me", protect, getMe);
  * @access Private
  */
 router.put("/onboard", protect, completeOnboarding);
+
+/**
+ * @desc   Login user with phone number (Firebase)
+ * @route  POST /api/auth/phone-login
+ * @access Public
+ */
+router.post("/phone-login", phoneLogin);
+
+/**
+ * @desc   Login user with Firebase ID token
+ * @route  POST /api/auth/firebase-login
+ * @access Public
+ */
+router.post("/firebase-login", firebaseLogin);
 
 export default router;

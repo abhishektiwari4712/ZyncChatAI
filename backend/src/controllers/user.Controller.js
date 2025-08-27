@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
-import { upsertStreamUser } from "../lib/stream.js";
+import { upsertStreamUser, streamClient } from "../lib/stream.js";
 
 // ✅ Onboard a user
 const onboard = async (req, res) => {
@@ -155,28 +155,37 @@ const acceptFriendRequest = async (req, res) => {
       $addToSet: { friends: request.sender },
     });
 
-    // Ensure both users exist in Stream Chat
+    // Ensure both users exist in Stream Chat and create a channel between them
     try {
       const sender = await User.findById(request.sender);
       const recipient = await User.findById(request.recipient);
       
-      if (sender) {
+      if (sender && recipient) {
+        // Upsert Stream users
         await upsertStreamUser({
           id: sender._id.toString(),
           name: sender.fullName,
           image: sender.profilePic || ""
         });
-      }
-      
-      if (recipient) {
+        
         await upsertStreamUser({
           id: recipient._id.toString(),
           name: recipient.fullName,
           image: recipient.profilePic || ""
         });
+        
+        // Create a Stream chat channel between the users
+        const channelId = [sender._id.toString(), recipient._id.toString()].sort().join("-");
+        const channel = streamClient.channel("messaging", channelId, {
+          members: [sender._id.toString(), recipient._id.toString()],
+          created_by_id: sender._id.toString()
+        });
+        
+        // Create the channel
+        await channel.create();
       }
     } catch (streamError) {
-      console.error("Error ensuring Stream users exist:", streamError);
+      console.error("Error ensuring Stream users exist or creating channel:", streamError);
       // Don't fail the friend request if Stream operations fail
     }
 

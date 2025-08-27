@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { upsertStreamUser } from "../lib/stream.js";
+import admin from "firebase-admin";
 
 // Helper function to create and send token in cookie AND response
 const generateTokenAndSetCookie = (res, userId) => {
@@ -13,7 +14,7 @@ const generateTokenAndSetCookie = (res, userId) => {
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // secure only in production
-    sameSite: "strict",
+    sameSite: "none", // Changed to "none" to allow cross-origin requests
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -121,7 +122,12 @@ export const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 export const logoutUser = async (req, res) => {
   try {
-    res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) });
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      expires: new Date(0)
+    });
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error.message);
@@ -140,6 +146,152 @@ export const getMe = async (req, res) => {
     res.status(200).json({ success: true, user });
   } catch (error) {
     console.error("GetMe error:", error.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// @desc    Login user with phone number (Firebase)
+// @route   POST /api/auth/phone-login
+// @access  Public
+export const phoneLogin = async (req, res) => {
+  try {
+    const { firebaseToken } = req.body;
+
+    if (!firebaseToken) {
+      return res.status(400).json({ success: false, message: "Firebase token is required" });
+    }
+
+    // Verify Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const phoneNumber = decodedToken.phone_number;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: "Invalid Firebase token" });
+    }
+
+    // Check if user exists with this phone number
+    let user = await User.findOne({ phoneNumber });
+
+    // If user doesn't exist, create a new user
+    if (!user) {
+      // Generate a random password for the user
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
+      user = await User.create({
+        fullName: `User ${phoneNumber}`,
+        email: `${phoneNumber.replace("+", "")}@zyncchatai.com`, // Generate a unique email
+        password: hashedPassword,
+        phoneNumber: phoneNumber
+      });
+
+      // Create user in Stream Chat
+      try {
+        await upsertStreamUser({
+          id: user._id.toString(),
+          name: user.fullName,
+          image: user.profilePic || ""
+        });
+      } catch (streamError) {
+        console.error("Error creating Stream user:", streamError);
+        // Don't fail the registration if Stream creation fails
+      }
+    }
+
+    const token = generateTokenAndSetCookie(res, user._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        bio: user.bio,
+        profilePic: user.profilePic,
+        nativeLanguage: user.nativeLanguage,
+        learningLanguage: user.learningLanguage,
+        location: user.location,
+        isOnboarded: user.isOnboarded,
+        phoneNumber: user.phoneNumber
+      },
+      token, // Include token in response body
+    });
+  } catch (error) {
+    console.error("Phone login error:", error.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// @desc    Login user with Firebase ID token
+// @route   POST /api/auth/firebase-login
+// @access  Public
+export const firebaseLogin = async (req, res) => {
+  try {
+    const { firebaseToken } = req.body;
+
+    if (!firebaseToken) {
+      return res.status(400).json({ success: false, message: "Firebase token is required" });
+    }
+
+    // Verify Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const phoneNumber = decodedToken.phone_number;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ success: false, message: "Invalid Firebase token" });
+    }
+
+    // Check if user exists with this phone number
+    let user = await User.findOne({ phoneNumber });
+
+    // If user doesn't exist, create a new user
+    if (!user) {
+      // Generate a random password for the user
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
+      user = await User.create({
+        fullName: `User ${phoneNumber}`,
+        email: `${phoneNumber.replace("+", "")}@zyncchatai.com`, // Generate a unique email
+        password: hashedPassword,
+        phoneNumber: phoneNumber
+      });
+
+      // Create user in Stream Chat
+      try {
+        await upsertStreamUser({
+          id: user._id.toString(),
+          name: user.fullName,
+          image: user.profilePic || ""
+        });
+      } catch (streamError) {
+        console.error("Error creating Stream user:", streamError);
+        // Don't fail the registration if Stream creation fails
+      }
+    }
+
+    const token = generateTokenAndSetCookie(res, user._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        bio: user.bio,
+        profilePic: user.profilePic,
+        nativeLanguage: user.nativeLanguage,
+        learningLanguage: user.learningLanguage,
+        location: user.location,
+        isOnboarded: user.isOnboarded,
+        phoneNumber: user.phoneNumber
+      },
+      token, // Include token in response body
+    });
+  } catch (error) {
+    console.error("Firebase login error:", error.message);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

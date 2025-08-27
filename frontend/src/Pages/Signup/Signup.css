@@ -295,3 +295,30 @@
     padding: 30px 20px;
   }
 }  */
+
+.phone-auth-link {
+  background: none;
+  border: none;
+  color: #1db954;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 15px;
+  padding: 0;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  padding-left: 20px;
+}
+
+.phone-auth-link::before {
+  content: "📱";
+  position: absolute;
+  left: 0;
+}
+
+.phone-auth-link:hover {
+  color: #17a74a;
+}

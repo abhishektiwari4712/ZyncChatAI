@@ -97,6 +97,12 @@ const Signup = () => {
         <p className="signin-text">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
+        <button
+          className="phone-auth-link"
+          onClick={() => window.openPhoneAuthModal && window.openPhoneAuthModal()}
+        >
+          👉 Signup with Phone Number
+        </button>
       </div>
 
       <div className="signup-right">

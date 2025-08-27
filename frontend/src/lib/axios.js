@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const BASE = import.meta.env.VITE_BACKEND_URL;
-const BASE_URL = import.meta.env.MODE === "development" ? `${BASE}`: "/api"
+const BASE_URL = BASE; // Always use the full backend URL
 if (!BASE) {
   // Helps catch misconfigured env immediately
   // eslint-disable-next-line no-console
@@ -11,7 +11,7 @@ if (!BASE) {
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  withCredentials: false, // Don't send cookies, use Authorization header instead
+  withCredentials: true, // Send cookies with requests
 });
 
 // Add JWT token to Authorization header for all requests

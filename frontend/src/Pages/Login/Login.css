@@ -441,3 +441,30 @@ button:disabled {
   color: #ccc;
   padding: 0 10px;
 } */
+
+.phone-auth-link {
+  background: none;
+  border: none;
+  color: #00ff80;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 0.8rem;
+  padding: 0;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  position: relative;
+  padding-left: 20px;
+}
+
+.phone-auth-link::before {
+  content: "📱";
+  position: absolute;
+  left: 0;
+}
+
+.phone-auth-link:hover {
+  color: #00cc66;
+}

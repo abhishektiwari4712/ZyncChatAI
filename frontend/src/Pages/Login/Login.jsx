@@ -59,6 +59,20 @@ const Login = () => {
           <a href="/forgot-password" className="forgot-link">
             Forgot your password?
           </a>
+          <a href="">
+                      <button
+            className="phone-auth-link"
+            onClick={() => window.openPhoneAuthModal && window.openPhoneAuthModal()}
+          >
+            👉 Login with Phone Number
+          </button>
+          </a>
+          {/* <button
+            className="phone-auth-link"
+            onClick={() => window.openPhoneAuthModal && window.openPhoneAuthModal()}
+          >
+            👉 Login with Phone Number
+          </button> */}
         </div>
       </div>
 

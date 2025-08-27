@@ -25,6 +25,7 @@ const ChatPage = () => {
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
   const [Loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const { authUser } = useAuthUser();
 
   const { data: tokenData } = useQuery({
@@ -62,7 +63,7 @@ const ChatPage = () => {
       } catch (error) {
         console.error("Error initializing chat", error);
         toast.error("Could not connect to chat. Please try again.");
-        window.location.href = "/";
+        setConnectionError(true);
       } finally {
         setLoading(false);
       }
@@ -71,7 +72,17 @@ const ChatPage = () => {
     initChat();
   }, [tokenData, authUser, targetUserId]);
 
-  if (Loading || !chatClient || !channel) return <ChatLoader />;
+  if (Loading) return <ChatLoader />;
+  if (connectionError) {
+    return (
+      <div className="chat-error">
+        <h2>Could not connect to chat</h2>
+        <p>Please try again later or contact support if the problem persists.</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+  if (!chatClient || !channel) return <ChatLoader />;
 
   const handleVideoCall = () => {
     if (channel) {

@@ -8,6 +8,16 @@ export const signup = async (data) => {
 };
 
 export const login = async (data) => {
+  // If data contains a token (from Firebase phone auth), use it directly
+  if (data?.token && data?.isPhoneAuth) {
+    const res = await axiosInstance.post("/auth/firebase-login", {
+      firebaseToken: data.token
+    });
+    if (res?.data?.token) localStorage.setItem("token", res.data.token);
+    return res.data;
+  }
+  
+  // Regular email/password login
   const res = await axiosInstance.post("/auth/login", data);
   if (res?.data?.token) localStorage.setItem("token", res.data.token);
   return res.data;
