@@ -16,29 +16,29 @@ import Dashboard from "./Pages/Dashboard/Dashboard.jsx";
 import ChatPage from "./Pages/ChatPage/ChatPage.jsx";
 import CallPage from "./Pages/CallPage/CallPage.jsx";
 import Notification from "./Pages/Notification/Notification.jsx";
+import ForgotPassword from "./Pages/ForgotPassword/ForgotPassword.jsx";
 
 const Protected = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuthUser();
-  
-  // If no token exists, don't even try to authenticate
+
   if (!localStorage.getItem("token")) {
     return <Navigate to="/login" replace />;
   }
-  
+
   if (isLoading) {
-    return <div>Loading...</div>; // Show loading state
+    return <div>Loading...</div>;
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const OnboardingGate = ({ children }) => {
   const { isOnboarded, isLoading } = useAuthUser();
-  
+
   if (isLoading) {
-    return <div>Loading...</div>; // Show loading state
+    return <div>Loading...</div>;
   }
-  
+
   return isOnboarded ? <Navigate to="/" replace /> : children;
 };
 
@@ -46,12 +46,10 @@ export default function App() {
   const { isLoading } = useAuthUser();
   const { initTheme } = useThemeStore();
 
-  // Initialize theme on app start
   useEffect(() => {
     initTheme();
   }, [initTheme]);
 
-  // Show loading only if we have a token and are checking auth
   if (localStorage.getItem("token") && isLoading) {
     return <div>Loading...</div>;
   }
@@ -71,6 +69,10 @@ export default function App() {
         />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        
+        {/* ✅ Fixed Forgot Password Route */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
         <Route
           path="/onboarding"
           element={
