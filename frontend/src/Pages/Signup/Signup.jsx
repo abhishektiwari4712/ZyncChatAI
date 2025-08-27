@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import useAuthUser from "../../hooks/useAuthUser";
 import "./Signup.css";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import "../../lib/firebase";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +14,7 @@ const Signup = () => {
     agree: false,
   });
 
-  const { signup, isSigningUp } = useAuthUser();
+  const { signup, isSigningUp, login } = useAuthUser();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -41,6 +44,24 @@ const Signup = () => {
     } catch (err) {
       console.error("Signup error:", err);
       // Error handling is done in the useAuthUser hook
+    }
+  };
+
+  const authFirebase = getAuth();
+  const provider = new GoogleAuthProvider();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(authFirebase, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      // Reuse existing backend path for Firebase tokens
+      await login({ token, isPhoneAuth: true });
+      // Redirect handled inside useAuthUser login onSuccess
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      toast.error(error.message || "Google Sign-In failed");
     }
   };
 
@@ -93,6 +114,14 @@ const Signup = () => {
             {isSigningUp ? "Creating Account..." : "Create Account"}
           </button>
         </form>
+
+        <button 
+          onClick={handleGoogleSignIn}
+          className="google-btn"
+        >
+          <img src="/google-icon.svg" alt="Google" className="icon" />
+          Continue with Google
+        </button>
 
         <p className="signin-text">
           Already have an account? <Link to="/login">Sign in</Link>

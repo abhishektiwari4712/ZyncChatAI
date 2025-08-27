@@ -5,10 +5,29 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import useAuthUser from "../../hooks/useAuthUser.js";
 import "./Login.css";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import "../../lib/firebase";
 
 const Login = () => {
   const { login, isLoggingIn } = useAuthUser();
   const [form, setForm] = useState({ email: "", password: "" });
+  const authFirebase = getAuth();
+  const provider = new GoogleAuthProvider();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(authFirebase, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      // Reuse existing backend path for Firebase tokens
+      await login({ token, isPhoneAuth: true });
+      // Redirect handled inside useAuthUser login onSuccess
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      toast.error(error.message || "Google Sign-In failed");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,6 +70,14 @@ const Login = () => {
             {isLoggingIn ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <button 
+          onClick={handleGoogleSignIn}
+          className="google-btn"
+        >
+          <img src="/google-icon.svg" alt="Google" className="icon" />
+          Continue with Google
+        </button>
 
         <div className="login-footer">
           <p>
