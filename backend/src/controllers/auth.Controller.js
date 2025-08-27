@@ -295,3 +295,75 @@ export const firebaseLogin = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// @desc    Login user with Google
+// @route   POST /api/auth/google
+// @access  Public
+export const googleLogin = async (req, res) => {
+  try {
+    const { firebaseToken } = req.body;
+
+    if (!firebaseToken) {
+      return res.status(400).json({ success: false, message: "Firebase token is required" });
+    }
+
+    // Verify Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const { email, name, picture } = decodedToken;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Invalid Google token" });
+    }
+
+    // Check if user exists with this email
+    let user = await User.findOne({ email });
+
+    // If user doesn't exist, create a new user
+    if (!user) {
+      // Generate a random password for the user
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+
+      user = await User.create({
+        fullName: name || email.split('@')[0],
+        email: email,
+        password: hashedPassword,
+        profilePic: picture || ""
+      });
+
+      // Create user in Stream Chat
+      try {
+        await upsertStreamUser({
+          id: user._id.toString(),
+          name: user.fullName,
+          image: user.profilePic || ""
+        });
+      } catch (streamError) {
+        console.error("Error creating Stream user:", streamError);
+        // Don't fail the registration if Stream creation fails
+      }
+    }
+
+    const token = generateTokenAndSetCookie(res, user._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        bio: user.bio,
+        profilePic: user.profilePic,
+        nativeLanguage: user.nativeLanguage,
+        learningLanguage: user.learningLanguage,
+        location: user.location,
+        isOnboarded: user.isOnboarded
+      },
+      token, // Include token in response body
+    });
+  } catch (error) {
+    console.error("Google login error:", error.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

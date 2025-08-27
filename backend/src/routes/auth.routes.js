@@ -5,7 +5,8 @@ import {
   logoutUser,
   getMe,
   phoneLogin,
-  firebaseLogin
+  firebaseLogin,
+  googleLogin
 } from "../controllers/auth.Controller.js";
 import { completeOnboarding } from "../controllers/onboarding.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
@@ -60,5 +61,12 @@ router.post("/phone-login", phoneLogin);
  * @access Public
  */
 router.post("/firebase-login", firebaseLogin);
+
+/**
+ * @desc   Login user with Google
+ * @route  POST /api/auth/google
+ * @access Public
+ */
+router.post("/google", googleLogin);
 
 export default router;
