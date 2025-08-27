@@ -87,3 +87,24 @@ export async function getStreamToken() {
   const res = await axiosInstance.get("/chat/token");
   return res.data;
 }
+
+// ---------- AI Helpers ----------
+export const aiChatbot = async (prompt) => {
+  const res = await axiosInstance.post("/ai/chatbot", { prompt });
+  return res.data;
+};
+
+export const aiSmartReply = async (context) => {
+  const res = await axiosInstance.post("/ai/smart-reply", { context });
+  return res.data;
+};
+
+export const aiToxicCheck = async (text) => {
+  const res = await axiosInstance.post("/ai/toxic-check", { text });
+  return res.data;
+};
+
+export const aiSeoOptimize = async (text) => {
+  const res = await axiosInstance.post("/ai/seo-optimize", { text });
+  return res.data;
+};

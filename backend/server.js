@@ -17,6 +17,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import userRoutes from "./src/routes/user.route.js";
 import chatRoutes from "./src/routes/chat.routes.js";
 import passport from "./src/lib/passport.js";
+import aiRoutes from "./src/routes/ai.routes.js";
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ app.use(passport.initialize());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/ai", aiRoutes);
 
 // ==================
 // Serve static files from React build

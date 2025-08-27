@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'react-router'
 import useAuthUser from '../../hooks/useAuthUser';
-import { getStreamToken } from '../../lib/api';
+import { getStreamToken, aiChatbot, aiSmartReply, aiToxicCheck, aiSeoOptimize } from '../../lib/api';
 import { useQuery } from '@tanstack/react-query';
 import {
   Channel,
@@ -26,6 +26,7 @@ const ChatPage = () => {
   const [channel, setChannel] = useState(null);
   const [Loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const { authUser } = useAuthUser();
 
   const { data: tokenData } = useQuery({
@@ -94,11 +95,44 @@ const ChatPage = () => {
     }
   };
 
-  // Custom ChannelHeader component with call button
+  // Custom ChannelHeader component with call button and AI tools
   const CustomChannelHeader = () => (
     <div className="chat-header">
       <ChannelHeader />
-      <CallButton handleVideoCall={handleVideoCall} />
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <button onClick={async () => {
+          try {
+            const lastMsg = await channel?.state?.messages?.slice(-1)?.[0]?.text || '';
+            const { content } = await aiChatbot(lastMsg || 'Hello');
+            if (content) {
+              await channel.sendMessage({ text: content });
+            }
+          } catch (e) {
+            toast.error('AI assistant failed');
+          }
+        }} className="btn-ai" title="Ask AI">Ask AI</button>
+        <button onClick={async () => {
+          try {
+            const lastMsg = await channel?.state?.messages?.slice(-1)?.[0]?.text || '';
+            const { suggestions: sugs } = await aiSmartReply(lastMsg || '');
+            setSuggestions(Array.isArray(sugs) ? sugs : []);
+          } catch (e) {
+            toast.error('Failed to fetch smart replies');
+          }
+        }} className="btn-ai" title="Smart Replies">Smart Replies</button>
+        <button onClick={async () => {
+          try {
+            const lastMsg = await channel?.state?.messages?.slice(-1)?.[0]?.text || '';
+            const { optimized } = await aiSeoOptimize(lastMsg || '');
+            if (optimized) {
+              await channel.sendMessage({ text: optimized });
+            }
+          } catch (e) {
+            toast.error('SEO optimize failed');
+          }
+        }} className="btn-ai" title="SEO Optimize">SEO Optimize</button>
+        <CallButton handleVideoCall={handleVideoCall} />
+      </div>
     </div>
   );
 
@@ -113,7 +147,36 @@ const ChatPage = () => {
                 <MessageList />
               </div>
               <div className="chat-input-container">
-                <MessageInput focus />
+                <MessageInput
+                  focus
+                  overrideSubmitHandler={async (message) => {
+                    try {
+                      const text = message?.text || '';
+                      const { score } = await aiToxicCheck(text);
+                      if (score > 0.7) {
+                        toast.warning('⚠️ Message contains toxic content. Please edit before sending.');
+                        return;
+                      }
+                      await channel.sendMessage({ text });
+                    } catch (e) {
+                      toast.error('Failed to send message');
+                    }
+                  }}
+                />
+                {suggestions?.length > 0 && (
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                    {suggestions.slice(0,3).map((sug, idx) => (
+                      <button
+                        key={idx}
+                        className="btn-suggestion"
+                        onClick={() => {
+                          // Insert into MessageInput by sending immediately
+                          channel.sendMessage({ text: sug });
+                        }}
+                      >{sug}</button>
+                    ))}
+                  </div>
+                )}
               </div>
             </Window>
           </div>
