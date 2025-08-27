@@ -69,6 +69,18 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
+// ==================
+// Serve static files from React build
+// ==================
+const buildPath = path.resolve(__dirname, "../frontend/dist");
+app.use(express.static(buildPath));
+
+// ==================
+// Catch-all route for React Router
+// ==================
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+});
 
 // ==================
 // 404 Handler
