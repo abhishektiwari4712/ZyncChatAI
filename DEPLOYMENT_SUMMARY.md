@@ -1,3 +1,22 @@
+## Google OAuth (passport) integration summary
+
+- Backend:
+  - Added `passport` and `passport-google-oauth20` deps.
+  - Implemented Google strategy in `backend/src/lib/passport.js`.
+  - Wired passport in `backend/server.js` (`app.use(passport.initialize())`).
+  - Added routes to `backend/src/routes/auth.routes.js`:
+    - `GET /api/auth/google` → initiate OAuth
+    - `GET /api/auth/google/callback` → sign JWT and redirect to `${FRONTEND_URL}/login?token=...`.
+  - `.env` keys: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL`, `FRONTEND_URL`, `JWT_SECRET`.
+
+- Frontend:
+  - `Login.jsx` and `Signup.jsx` include a "Continue with Google" that redirects to `/api/auth/google`.
+  - `Login.jsx` reads `?token=` on load, stores it, and redirects to home.
+
+- Google Cloud OAuth
+  - Authorized JS origins: `https://zyncchatai.onrender.com`, `http://localhost:5173`.
+  - Redirect URIs: `https://zyncchatai.onrender.com/api/auth/google/callback`, `http://localhost:5001/api/auth/google/callback`.
+
 # Deployment Summary
 
 This document summarizes all the changes made to deploy your MERN stack application with:

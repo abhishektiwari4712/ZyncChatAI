@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 import authRoutes from "./src/routes/auth.routes.js";
 import userRoutes from "./src/routes/user.route.js";
 import chatRoutes from "./src/routes/chat.routes.js";
+import passport from "./src/lib/passport.js";
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use(
 app.use(express.json()); // Parse JSON body
 app.use(cookieParser()); // Parse cookies
 app.use(morgan("dev")); // Log requests
+app.use(passport.initialize());
 
 // ==================
 // API Routes

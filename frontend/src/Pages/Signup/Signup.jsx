@@ -48,36 +48,9 @@ const Signup = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const auth = getAuth();
-      const provider = new GoogleAuthProvider();
-
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      // Send Firebase ID token to backend (expected key: firebaseToken)
-      const res = await axios.post("/api/auth/google", { firebaseToken: idToken });
-
-      // Persist JWT for subsequent API calls
-      if (res?.data?.token) {
-        try {
-          localStorage.setItem("token", res.data.token);
-        } catch (_) {}
-      }
-
-      // Redirect based on onboarding status (same logic as email/password signup)
-      const isOnboarded = res?.data?.user?.isOnboarded;
-      toast.success("Account created successfully!");
-      window.location.href = isOnboarded ? "/" : "/onboarding";
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      toast.error(error?.response?.data?.message || error.message || "Google Sign-In failed");
-    } finally {
-      setIsGoogleLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    // Passport OAuth flow: redirect to backend
+    window.location.href = "/api/auth/google";
   };
 
   return (

@@ -1,3 +1,9 @@
+## Google Sign-In via Passport (Redirect Flow)
+
+- Both `Login.jsx` and `Signup.jsx` render a "Continue with Google" button that redirects to `/api/auth/google`.
+- After authentication, backend redirects to `/login?token=JWT`.
+- `Login.jsx` reads `?token`, stores it, and redirects to `/`.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

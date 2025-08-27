@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useEffect } from "react";
 import axios from "../../lib/axios.js";
 import useAuthUser from "../../hooks/useAuthUser.js";
 import "./Login.css";
@@ -22,37 +23,23 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const auth = getAuth();
-      const provider = new GoogleAuthProvider();
-
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      // Send Firebase ID token to backend (expected key: firebaseToken)
-      const res = await axios.post("/api/auth/google", { firebaseToken: idToken });
-
-      // Persist JWT for subsequent API calls
-      if (res?.data?.token) {
-        try {
-          localStorage.setItem("token", res.data.token);
-        } catch (_) {}
-      }
-
-      // Redirect based on onboarding status (same logic as email/password login)
-      const isOnboarded = res?.data?.user?.isOnboarded;
-      toast.success("Logged in successfully!");
-      window.location.href = isOnboarded ? "/" : "/onboarding";
-    } catch (error) {
-      console.error("Google Sign-In Error:", error);
-      toast.error(error?.response?.data?.message || error.message || "Google Sign-In failed");
-    } finally {
-      setIsGoogleLoading(false);
-    }
+  const handleGoogleSignIn = () => {
+    // Passport OAuth flow: redirect to backend
+    window.location.href = "/api/auth/google";
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      try {
+        localStorage.setItem("token", token);
+      } catch (_) {}
+      // After saving token, redirect to dashboard/home
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.location.href = "/";
+    }
+  }, []);
 
   return (
     <div className="login-page">

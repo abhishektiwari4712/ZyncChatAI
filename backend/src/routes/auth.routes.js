@@ -9,6 +9,8 @@ import {
   googleLogin
 } from "../controllers/auth.Controller.js";
 import { completeOnboarding } from "../controllers/onboarding.controller.js";
+import jwt from "jsonwebtoken";
+import passport from "../lib/passport.js";
 import { protect } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -68,5 +70,37 @@ router.post("/firebase-login", firebaseLogin);
  * @access Public
  */
 router.post("/google", googleLogin);
+
+/**
+ * @desc   Initiate Google OAuth (passport)
+ * @route  GET /api/auth/google
+ * @access Public
+ */
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" })
+);
+
+/**
+ * @desc   Google OAuth callback
+ * @route  GET /api/auth/google/callback
+ * @access Public
+ */
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: (process.env.FRONTEND_URL || "http://localhost:5173") + "/login?error=oauth_failed" }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+      const frontend = process.env.FRONTEND_URL || "http://localhost:5173";
+      const redirectUrl = `${frontend}/login?token=${token}`;
+      return res.redirect(redirectUrl);
+    } catch (err) {
+      const frontend = process.env.FRONTEND_URL || "http://localhost:5173";
+      return res.redirect(`${frontend}/login?error=server_error`);
+    }
+  }
+);
 
 export default router;
