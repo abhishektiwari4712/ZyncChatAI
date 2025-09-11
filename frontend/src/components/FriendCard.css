@@ -1,0 +1,97 @@
+.friend-card {
+  background-color: var(--background-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 0 0 transparent;
+  transition: all 0.3s ease;
+}
+
+.friend-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.friend-card-body {
+  padding: 16px;
+}
+
+.friend-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.friend-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--primary-color);
+}
+
+.friend-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friend-name {
+  font-weight: 600;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color);
+}
+
+.friend-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-native {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}
+
+.badge-learning {
+  border: 1px solid var(--primary-color);
+  color: var(--text-color);
+  background-color: transparent;
+}
+
+.flag-icon {
+  height: 14px;
+  margin-right: 4px;
+}
+
+.friend-message-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: center;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  color: var(--primary-color);
+  background-color: transparent;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.friend-message-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}

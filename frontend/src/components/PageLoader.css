@@ -1,0 +1,42 @@
+
+/* PageLoader.css */
+.page-loader {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-icon {
+  animation: spin 1s linear infinite;
+  font-size: 40px; /* Same as Tailwind's size-10 = 2.5rem = 40px */
+  color: #0d6efd; /* Similar to Tailwind's text-primary (Bootstrap primary blue) */
+}
+
+/* Spin animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* .page-loader-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-icon {
+  animation: spin 1s linear infinite;
+  width: 40px;
+  height: 40px;
+  color: #22c55e; /* Optional: Green shade 
+}
+
+/* Spin Animation 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} */

@@ -1,0 +1,12 @@
+/* src/App.css */
+.app-container {
+  height: 100vh;
+  padding: 16px;
+  background-color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.welcome-message {
+  margin-bottom: 16px;
+  color: #16a34a;
+  font-weight: bold;
+}

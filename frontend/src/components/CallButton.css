@@ -1,0 +1,62 @@
+.call-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-btn {
+  background-color: #16a34a; /* btn-success */
+  color: white; /* text-white */
+  padding: 0.5rem;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px; /* Ensure minimum touch target size */
+}
+
+.call-btn:hover {
+  background-color: #15803d; /* darker green on hover */
+}
+
+.call-btn:focus {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+
+.video-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .call-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+  
+  .video-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .call-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+  
+  .video-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
